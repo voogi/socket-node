@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="pixi.js"></script>
+    <script src="items.js"></script>
+    <script src="utils.js"></script>
+    <script src="game.js"></script>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="custom.css">
+</head>
+<body class="custom">
+    <!--<div class="login-form-wrapper">-->
+        <!--<div>Username</div>-->
+        <!--<input type="text"/>-->
+    <!--</div>-->
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Username</h4>
+                </div>
+                <div class="modal-body">
+                    <label for="username">Username</label>
+                    <input type="text" id="username">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary start-button">Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

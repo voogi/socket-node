@@ -1,0 +1,16 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+.custom {
+    cursor: url('images/crosshair2.png'), auto;
+}
+
+.modal {
+    display: block;
+}
+
+.modal-dialog {
+    cursor: default;
+    top:200px;
+}
