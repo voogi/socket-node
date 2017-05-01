@@ -38,7 +38,7 @@ function Utils() {
                 }
                 return frames;
             })(),
-            shoot : (function(){
+            shoot: (function () {
                 let frames = [];
                 for (let i = 0; i <= 2; i++) {
                     frames.push(PIXI.Texture.fromFrame('images/character/handgun/shoot/survivor-shoot_handgun_' + i + '.png'));
@@ -57,7 +57,7 @@ function Utils() {
 
 
 Utils.prototype = {
-    healthText: function(_health){
+    healthText: function (_health) {
         return "HEALTH:" + _health + "/100";
     },
     keyboard: function (keyCode) {
@@ -89,7 +89,7 @@ Utils.prototype = {
         return key;
     },
     contain: function (sprite, container) {
-        var collision = undefined;
+        let collision = undefined;
         //Left
         if (sprite.x < container.x) {
             sprite.x = container.x;
@@ -115,6 +115,17 @@ Utils.prototype = {
     },
     randomInt: function (min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    getVelocity: function (mouse, player, correction) {
+
+        let targetX = mouse.x + correction - player.x;
+        let targetY = mouse.y + correction - player.y;
+        let mag = Math.sqrt(targetX * targetX + targetY * targetY);
+
+        return {
+            x: (targetX / mag) * 25,
+            y: (targetY / mag) * 25
+        }
     },
     rotateToPoint: function (mx, my, px, py) {
         let dist_Y = my - py;

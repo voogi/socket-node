@@ -7,9 +7,7 @@ let Container = PIXI.Container,
     Sprite = PIXI.Sprite,
     Text = PIXI.Text,
     Graphics = PIXI.Graphics;
-AnimatedSprite = PIXI.extras.AnimatedSprite;
-
-let UTILS;
+    AnimatedSprite = PIXI.extras.AnimatedSprite;
 
 
 let Game = function () {
@@ -62,7 +60,7 @@ Game.prototype = {
         this.stage.addChild(this.gameScene);
         this.stage.interactive = true;
         this.stage.interactiveChildren = true;
-        UTILS = new Utils();
+        this.utils = new Utils();
         this.initHealthBar();
         this.initPlayer();
         this.keyboardEvent();
@@ -70,7 +68,7 @@ Game.prototype = {
     },
     initHealthBar: function () {
 
-        this.healthBar.textStr = new Text("HEALTH:"/*UTILS.healthText(this.playerProps.health)*/, UTILS.style);
+        this.healthBar.textStr = new Text("HEALTH:"/*this.utils.healthText(this.playerProps.health)*/, this.utils.style);
         this.healthBar.textStr.x = 10;
         this.healthBar.textStr.y = 10;
         this.gameScene.addChild(this.healthBar.textStr);
@@ -97,7 +95,7 @@ Game.prototype = {
     },
     initPlayer: function () {
 
-        this.player = new AnimatedSprite(UTILS.frames.character.idle);
+        this.player = new AnimatedSprite(this.utils.frames.character.idle);
         this.player.x = window.innerWidth / 2 - this.player.width / 2;
         this.player.y = window.innerHeight / 2 - this.player.height / 2;
         this.player.vx = 0;
@@ -108,7 +106,7 @@ Game.prototype = {
         this.player.scale.set(0.2);
         this.gameScene.addChild(this.player);
 
-        this.playerProps.playerName = new Text(this.playerProps.name, UTILS.style);
+        this.playerProps.playerName = new Text(this.playerProps.name, this.utils.style);
         this.gameScene.addChild(this.playerProps.playerName);
 
         //set game started state
@@ -168,7 +166,7 @@ Game.prototype = {
 
         this.socket.on("newplayer", function (clients) {
 
-            if (UTILS.isEmpty(clients)) return;
+            if (_this.utils.isEmpty(clients)) return;
 
             if (clients) {
                 for (let i in clients) {
@@ -200,7 +198,7 @@ Game.prototype = {
 
                     _this.otherPlayers[i].healthBarGroup = healthBarGroup;
 
-                    let player = new AnimatedSprite(UTILS.frames.character.idle);
+                    let player = new AnimatedSprite(_this.utils.frames.character.idle);
                     player.x = clients[i].x;
                     player.y = clients[i].y;
                     player.anchor.set(0.5);
@@ -211,7 +209,7 @@ Game.prototype = {
                     _this.otherPlayers[i].player = player;
                     _this.gameScene.addChild(player);
 
-                    _this.otherPlayers[i].name = new Text(clients[i].name.str, UTILS.style);
+                    _this.otherPlayers[i].name = new Text(clients[i].name.str, _this.utils.style);
                     _this.otherPlayers[i].name.x = clients[i].name.x;
                     _this.otherPlayers[i].name.y = clients[i].name.y;
 
@@ -230,26 +228,20 @@ Game.prototype = {
     },
     fire: function (_rotation) {
 
+        //set fireRate
         let now = new Date();
         if (now - this.playerProps.lastShootTime < this.playerProps.weapon.fireRate) return;
         this.playerProps.lastShootTime = now;
 
-        this.player.textures = UTILS.frames.character.shoot;
+        this.player.textures = this.utils.frames.character.shoot;
         this.player.animationSpeed = 0.2;
         setTimeout(function(){
-            this.player.textures = UTILS.frames.character.idle;
+            this.player.textures = this.utils.frames.character.idle;
             this.player.animationSpeed = 0.5;
         }.bind(this),100);
 
-        let targetX = this.renderer.plugins.interaction.mouse.global.x + 16 - this.player.x;
-        let targetY = this.renderer.plugins.interaction.mouse.global.y + 16 - this.player.y;
 
-        let mag = Math.sqrt(targetX * targetX + targetY * targetY);
-
-        let velocityInstance = {x: 0, y: 0};
-
-        velocityInstance.x = (targetX / mag) * 25;
-        velocityInstance.y = (targetY / mag) * 25;
+        let velocityInstance = this.utils.getVelocity(this.renderer.plugins.interaction.mouse.global, this.player, 16);
 
         let graphics = new Sprite(resources["images/bullet.png"].texture);
         graphics.x = this.player.x;
@@ -286,11 +278,11 @@ Game.prototype = {
     },
     keyboardEvent: function () {
 
-        this.keys.left = UTILS.keyboard(65);
-        this.keys.up = UTILS.keyboard(87);
-        this.keys.right = UTILS.keyboard(68);
-        this.keys.down = UTILS.keyboard(83);
-        this.keys.space = UTILS.keyboard(32);
+        this.keys.left = this.utils.keyboard(65);
+        this.keys.up = this.utils.keyboard(87);
+        this.keys.right = this.utils.keyboard(68);
+        this.keys.down = this.utils.keyboard(83);
+        this.keys.space = this.utils.keyboard(32);
 
     },
     update: function () {
@@ -324,7 +316,7 @@ Game.prototype = {
         this.playerProps.playerName.x = this.player.x - this.playerProps.playerName.width / 2;
         this.playerProps.playerName.y = this.player.y - 50;
 
-        this.player.rotation = UTILS.rotateToPoint(
+        this.player.rotation = this.utils.rotateToPoint(
             this.renderer.plugins.interaction.mouse.global.x,
             this.renderer.plugins.interaction.mouse.global.y,
             this.player.x, this.player.y);
@@ -345,7 +337,7 @@ Game.prototype = {
 
             //check other players hit collisions
             for (let j = 0; j < otherPlayerIds.length; j++) {
-                if (UTILS.hitTestRectangle(this.projectiles[i], this.otherPlayers[otherPlayerIds[j]].player)) {
+                if (this.utils.hitTestRectangle(this.projectiles[i], this.otherPlayers[otherPlayerIds[j]].player)) {
                     if (this.projectiles[i].playerId == otherPlayerIds[j]) continue;
                     this.socket.emit("hit",{
                         clientId : otherPlayerIds[j],
@@ -365,7 +357,7 @@ Game.prototype = {
             if(this.projectiles[i]){
                 //check the PLAYER collisions to otherPlayers projectiles
                 if (this.projectiles[i].playerId != this.socket.id) {
-                    if (UTILS.hitTestRectangle(this.projectiles[i], this.player)) {
+                    if (this.utils.hitTestRectangle(this.projectiles[i], this.player)) {
                         this.player.alpha = 0.5;
                         this.gameScene.removeChild(this.projectiles[i]);
                         this.projectiles.splice(i, 1);
@@ -411,7 +403,7 @@ Game.prototype = {
         }
 
         //set player coordinates within canvas
-        UTILS.contain(this.player,
+        this.utils.contain(this.player,
             {
                 x: this.player.width / 2, y: this.player.height / 2,
                 width: window.innerWidth + this.player.width / 2,
