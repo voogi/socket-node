@@ -238,6 +238,8 @@ Game.prototype = {
     },
     fire: function (_rotation) {
 
+        console.log("ROTATION", _rotation)
+
         //set fireRate
         let now = new Date();
         if (now - this.playerProps.lastShootTime < this.playerProps.weapon.fireRate) return;
@@ -254,8 +256,12 @@ Game.prototype = {
         let velocityInstance = this.utils.getVelocity(this.renderer.plugins.interaction.mouse.global, this.player, 16);
 
         let graphics = new Sprite(resources["images/bullet.png"].texture);
-        graphics.x = this.player.x;
-        graphics.y = this.player.y;
+        graphics.x =   this.player.x + Math.cos(_rotation)*10 + Math.sin(_rotation)* -10;
+        graphics.y = this.player.y + Math.sin(_rotation)*10 + Math.cos(_rotation)* 10;
+
+        console.log("PLAYER_X", this.player.x);
+        console.log("PLAYER_Y", this.player.y);
+
         graphics.anchor.set(0.5);
         graphics.scale.set(0.1);
         graphics.vx = velocityInstance.x;

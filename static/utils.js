@@ -120,6 +120,7 @@ Utils.prototype = {
 
         let targetX = mouse.x + correction - player.x;
         let targetY = mouse.y + correction - player.y;
+
         let mag = Math.sqrt(targetX * targetX + targetY * targetY);
 
         return {

@@ -2,7 +2,7 @@ const Weapon = {
 
     PISTOL : {
         damage : 5,
-        fireRate : 300,
+        fireRate : 50,
         type: "PISTOL"
     }
 
