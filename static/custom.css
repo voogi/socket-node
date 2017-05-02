@@ -14,3 +14,9 @@
     cursor: default;
     top:200px;
 }
+
+.leaderboards {
+    position: fixed;
+    top: 0;
+    right: 0;
+}

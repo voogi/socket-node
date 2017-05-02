@@ -116,9 +116,13 @@ Game.prototype = {
     socketEvent: function () {
 
         //connect to server with username param
-        this.socket = io.connect('', {query: 'name=' + this.playerProps.name})
+        this.socket = io.connect('', {query: 'name=' + this.playerProps.name});
 
         let _this = this;
+
+        this.socket.on("otherplayerdead", function(data){
+            _this.resetOtherPlayer(data.clientId);
+        });
 
         this.socket.on("otherprojectile", function (proj) {
 
@@ -220,6 +224,12 @@ Game.prototype = {
         });
 
     },
+    resetOtherPlayer: function(_id){
+        if(this.otherPlayers[_id]){
+            this.otherPlayers[_id].health = 100;
+            this.otherPlayers[_id].healthBarGroup.outer.width = 50;
+        }
+    },
     removeOtherPlayerFromStageById: function(_id){
         this.gameScene.removeChild(this.otherPlayers[_id].player);
         this.gameScene.removeChild(this.otherPlayers[_id].name);
@@ -276,6 +286,19 @@ Game.prototype = {
         }
         return false;
     },
+    resetPlayer: function (_killer) {
+
+        //this.player.visible = false;
+        this.playerProps.health = 100;
+        this.healthBar.outer.width = 100;
+        this.player.x = window.innerWidth / 2 - this.player.width / 2;
+        this.player.y = window.innerHeight / 2 - this.player.height / 2;
+
+        this.socket.emit("playerdead", {
+            killer : _killer
+        });
+
+    },
     keyboardEvent: function () {
 
         this.keys.left = this.utils.keyboard(65);
@@ -283,6 +306,8 @@ Game.prototype = {
         this.keys.right = this.utils.keyboard(68);
         this.keys.down = this.utils.keyboard(83);
         this.keys.space = this.utils.keyboard(32);
+        this.keys.shift = this.utils.keyboard(16);
+        this.keys.R = this.utils.keyboard(82);
 
     },
     update: function () {
@@ -309,6 +334,8 @@ Game.prototype = {
         if (this.keys.right.isDown) {
             this.player.vx += this.playerProps.speed;
         }
+
+
 
         this.player.x += this.player.vx;
         this.player.y += this.player.vy;
@@ -358,18 +385,22 @@ Game.prototype = {
                 //check the PLAYER collisions to otherPlayers projectiles
                 if (this.projectiles[i].playerId != this.socket.id) {
                     if (this.utils.hitTestRectangle(this.projectiles[i], this.player)) {
+                        let killer = this.projectiles[i].playerId;
                         this.player.alpha = 0.5;
                         this.gameScene.removeChild(this.projectiles[i]);
                         this.projectiles.splice(i, 1);
-                        if(!this.isPlayerDead()){
-                            //TODO change player weapon to other player weapon damage
-                            this.playerProps.health -= this.playerProps.weapon.damage;
-                            this.healthBar.outer.width =
-                                Math.round(this.healthBar.outer.width-this.playerProps.weapon.damage);
-                            setTimeout(function () {
-                                this.player.alpha = 1;
-                            }.bind(this), 100);
+                        //TODO change player weapon to other player weapon damage
+                        this.playerProps.health -= this.playerProps.weapon.damage;
+                        this.healthBar.outer.width =
+                            Math.round(this.healthBar.outer.width-this.playerProps.weapon.damage);
+                        setTimeout(function () {
+                            this.player.alpha = 1;
+                        }.bind(this), 100);
+
+                        if(this.isPlayerDead()){
+                            this.resetPlayer(killer);
                         }
+
                     }
                 }
             }
